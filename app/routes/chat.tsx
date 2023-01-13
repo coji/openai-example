@@ -36,6 +36,7 @@ export const action = async ({ request }: ActionArgs) => {
     return json({ prompt: null, completion: null })
   }
 
+  // コストかかるので一旦ダミーで画面作る
   const dummy = {
     id: 'cmpl-6Y6HsFiPmsnTBmgYUai7vGAjXH5gw',
     object: 'text_completion',
@@ -92,15 +93,10 @@ export default function Index() {
           )}
         </VStack>
 
-        <fetcher.Form
-          method="post"
-          onSubmit={(val) => {
-            console.log('submit')
-          }}
-        >
+        <fetcher.Form method="post">
           <VStack w="full">
-            <FormControl alignItems="baseline" display="flex" w="full">
-              <FormLabel>Prompt: </FormLabel>
+            <FormControl alignItems="center" display="flex" w="full">
+              <FormLabel>Prompt</FormLabel>
               <Input autoFocus name="prompt" />
             </FormControl>
 
