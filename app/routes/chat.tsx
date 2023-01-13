@@ -8,9 +8,7 @@ import {
   Input,
   VStack,
 } from '@chakra-ui/react'
-import {
-  /*Configuration, OpenAIApi,*/ type CreateCompletionResponse,
-} from 'openai'
+import { Configuration, OpenAIApi, type CreateCompletionResponse } from 'openai'
 import { json, type ActionArgs, type LoaderArgs } from '@remix-run/node'
 import { useFetcher, useLoaderData } from '@remix-run/react'
 import { Prompt } from '~/components/Prompt'
@@ -25,6 +23,14 @@ export const loader = async ({ request }: LoaderArgs) => {
   return json({ user })
 }
 
+const recruiteLetterPrompt = `
+あなたは IT 企業のCTO です。
+これから GitHub で見つけた有望なソフトウェアエンジニアに対して、具体的な言葉でスカウトメールを送らなければなりません。
+スカウトメールの文面を考えてください。
+なるべく丁寧に、かつ完結に伝える必要があるので、120文字以内で書いてください。
+相手の名前は *** です。
+`
+
 export const action = async ({ request }: ActionArgs) => {
   await auth.isAuthenticated(request, {
     failureRedirect: '/',
@@ -37,6 +43,7 @@ export const action = async ({ request }: ActionArgs) => {
   }
 
   // コストかかるので一旦ダミーで画面作る
+  /*
   const dummy = {
     id: 'cmpl-6Y6HsFiPmsnTBmgYUai7vGAjXH5gw',
     object: 'text_completion',
@@ -53,25 +60,27 @@ export const action = async ({ request }: ActionArgs) => {
     usage: { prompt_tokens: 1, completion_tokens: 16, total_tokens: 17 },
   } as CreateCompletionResponse
   return json({ prompt, completion: dummy })
+*/
+  const configuration = new Configuration({
+    apiKey: process.env.OPENAI_API_KEY,
+  })
+  const openai = new OpenAIApi(configuration)
+  const completion = await openai
+    .createCompletion({
+      model: 'text-davinci-003',
+      prompt: recruiteLetterPrompt.replace('***', prompt),
+      max_tokens: 200,
+      temperature: 0,
+    })
+    .catch((e) => {
+      return null
+    })
 
-  // const configuration = new Configuration({
-  //   apiKey: process.env.OPENAI_API_KEY,
-  // })
-  // const openai = new OpenAIApi(configuration)
-  // const completion = await openai
-  //   .createCompletion({
-  //     model: 'text-davinci-003',
-  //     prompt,
-  //   })
-  //   .catch((e) => {
-  //     return null
-  //   })
+  if (!completion) {
+    throw new Error('error!')
+  }
 
-  // if (!completion) {
-  //   throw new Error('error!')
-  // }
-
-  // return json({ prompt, completion: completion.data })
+  return json({ prompt, completion: completion.data })
 }
 
 export default function Index() {
