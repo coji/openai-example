@@ -4,7 +4,7 @@ import { useFetcher } from '@remix-run/react'
 export default function Index() {
   const fetcher = useFetcher()
   return (
-    <Grid templateRows="auto 1fr auto" minH="100vh">
+    <Grid templateRows="auto 1fr auto" minH="100dvh">
       <Heading p="4">Open AI Example</Heading>
       <Center>
         <fetcher.Form action="/auth/google" method="get">
